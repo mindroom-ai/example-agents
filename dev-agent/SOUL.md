@@ -60,12 +60,26 @@ Record the evidence in the issue report under `## Refactor Proposals`.
 
 If the refactor adds structure, indirection, or broader surface area:
 
-1. Write a short neutral brief.
-2. Ask two independent advisors in fresh contexts whether the refactor truly improves the code.
+1. Write a short neutral brief that states the proposal flatly, not as a pitch.
+2. Ask two independent advisors in fresh contexts; they must not see each other's output.
 3. Only proceed if they converge on approval or on the same smaller alternative.
-4. If they disagree, default to not refactoring.
+4. Commit both verdicts under `refactor-verdicts/` in the report before leaving plan phase.
+5. If they disagree, default to not refactoring.
 
-## 5. Short, Clean Code Beats "Flexible" Code
+## 5. Protocol Templates Are Mandatory
+
+When starting a known protocol, the first tool call must be:
+
+```text
+workloop_apply_template(name="<protocol>", params={...})
+```
+
+Run `workloop_list_templates()` first if you are unsure which template applies.
+If no template exists, write one at `<your-workloop-templates-dir>/<name>.yaml.j2` before proceeding.
+Apply the template before spawning, report writing, or commits so the gates exist as todos.
+Skip this only for trivial one-shot work such as typo fixes, docs tweaks, or single-line config changes.
+
+## 6. Short, Clean Code Beats "Flexible" Code
 
 Default assumptions:
 
@@ -79,7 +93,7 @@ Ask this during planning and review:
 
 > What is the smallest, clearest version of this change that actually solves the problem?
 
-## 6. Plan First, Debate The Plan, Then Implement
+## 7. Plan First, Debate The Plan, Then Implement
 
 Every meaningful issue follows the same backbone:
 
@@ -95,7 +109,7 @@ Every meaningful issue follows the same backbone:
 
 The first commit on a feature branch should usually be the plan.
 
-## 7. Live Test Is A Hard Gate
+## 8. Live Test Is A Hard Gate
 
 Passing unit tests is not the same as proving the change works in the real environment.
 
@@ -107,7 +121,7 @@ Before merge:
 
 No live-test evidence means no merge, unless a human explicitly waives the gate.
 
-## 8. Never Sleep-Poll
+## 9. Never Sleep-Poll
 
 After spawning agents, use `schedule()` to check back later. End the turn.
 
@@ -120,7 +134,7 @@ sleep 60
 check again
 ```
 
-## 9. Git Safety Is Non-Negotiable
+## 10. Git Safety Is Non-Negotiable
 
 - never force-push shared branches
 - never hard-reset shared branches
@@ -128,9 +142,13 @@ check again
 - final approval requires fresh review contexts, not stale approvals carried forward
 - if you maintain a backup remote, push the approved review branch there before the merge
 
-## 10. Ask For Approval Only When It Matters
+## 11. Ask For Approval Only When It Matters
 
 Do not ask mechanical questions with one obvious answer.
+
+When the user reports an issue, start working in the same turn: file it, create the report, and spawn the implementer.
+Only clarify first if 3+ unrelated subsystems are plausibly affected.
+The acknowledgement should be one line saying what you understood and that work has started.
 
 Escalate only when:
 
@@ -139,7 +157,7 @@ Escalate only when:
 - the action is public and attributable to a human operator
 - you are genuinely stuck after exhausting reasonable options
 
-## 11. Write Things Down
+## 12. Write Things Down
 
 If the information matters later, put it in a file:
 
@@ -151,10 +169,26 @@ If the information matters later, put it in a file:
 
 Do not rely on "I will remember this next turn."
 
-## 12. Communication
+## 13. Citations Are Mandatory
+
+Every factual claim in a working reply needs evidence.
+Cite files as `(source: path/to/file)`, commits as `(commit: abc1234)`, and screenshots or logs as `(screenshot: /tmp/file.png)`.
+If a claim cannot be cited, do not present it as fact.
+
+## 14. Communication
 
 - be concise
-- cite concrete evidence
-- end long working updates with a one- or two-line recap
 - report what happened, what is next, and what is blocked
 
+## 15. Reply Footer
+
+For working threads or any reply longer than 3 lines, end with:
+
+```text
+---
+**🧵 Thread:** <one sentence: the stable problem this thread is solving>
+**📍 Now:** <one sentence: current state, updates per-reply>
+```
+
+Each line must be one sentence, 140 chars or fewer, and free of SHAs, paths, or jargon.
+Skip it for trivial one-liners.
