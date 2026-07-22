@@ -20,11 +20,11 @@ Always write important state to files. Never rely on conversational memory.
 
 ### Starting Work
 
-1. Load the `project-dev` skill instructions.
-2. Check the issue tracker.
-3. Pick up or file an issue.
-4. Create `skills/project-dev/references/reports/<ISSUE-REF>.md`.
-5. Spawn agents. Do not investigate or implement substantial work inline.
+1. Check the issue tracker and pick up or file the issue.
+2. For non-trivial work, call `workloop_apply_template(name="<protocol>", params={...})` before creating reports, todos, or merge artifacts. This materializes the full lifecycle as enforceable todos so gates cannot be silently skipped.
+3. If you are unsure which template applies, run `workloop_list_templates()` first. If no template exists for this kind of work, author one before proceeding rather than improvising.
+4. Work the template's first actionable todo. Do not pre-create artifacts the template already owns.
+5. Load the relevant skill instructions and spawn agents. Do not investigate or implement substantial work inline.
 
 ### Spawning Agents
 
@@ -79,10 +79,15 @@ If you use the included helper, adapt and run:
 skills/project-dev/scripts/safe-squash-merge.sh <branch> 'fix: <summary> (<ISSUE-REF>)'
 ```
 
+### Commit Messages
+
+- explain problem / approach / why / how — not operational chaff (test counts, reviewer names, "all green", file lists)
+- write the body one sentence per line; do not hard-wrap at 72/80 columns. Sentence-per-line bodies diff cleanly on later edits and skim well in `git log`. Subject line ≤72 chars still applies; the no-wrap rule is body-only.
+
 ### Cleanup
 
 - remove plan and review artifacts before the final commit
-- delete finished worktrees only after the merge is complete
+- retain merged worktrees if your workflow keeps them on disk for follow-up context; do not delete them by habit
 - keep the report and issue tracker updated
 
 ## Safety
@@ -98,12 +103,25 @@ skills/project-dev/scripts/safe-squash-merge.sh <branch> 'fix: <summary> (<ISSUE
 If your local integration branch intentionally diverges from `origin/main`, document that fact in `ARCHITECTURE.md` and honor it consistently:
 
 - compare pull requests against `origin/main`
+- if local `main` or `dev` may be ahead of `origin/main`, treat local integration branches as staging state rather than the canonical release target
+- do not declare a pull request obsolete just because similar commits already exist on a locally-ahead integration branch
 - do not hard-reset the local integration branch to match upstream
+- never run `git reset --hard origin/*` on a shared local integration branch
 - do not assume the checked-out local branch is the canonical release state
 
 ## Thread Etiquette
 
 - keep one issue per thread
-- tag and summarize threads early if your platform supports it
+- tag threads early if your platform supports it
+- write or update the thread summary early, not only at the end
 - when asked to start a new thread, spawn it and move the work there instead of doing the work in the old thread
+
+## Starting New Threads For Delegated Work
+
+When asked to move work into a new thread:
+
+1. Use `sessions_spawn(task="<full task description>")` or the equivalent thread-spawn mechanism that also dispatches the agent.
+2. Do not start investigating or implementing the task in the current thread.
+3. Post the link to the new thread and stop.
+4. Do not use plain room-message tools for handoffs if they create a thread root but do not actually dispatch the agent.
 

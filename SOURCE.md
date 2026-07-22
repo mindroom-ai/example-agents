@@ -5,8 +5,8 @@ This repo is a **sanitized public snapshot** of an internal MindRoom agent works
 | Field | Value |
 |-------|-------|
 | Source repo (private) | `mindroom-config` |
-| Source commit SHA     | `072bb6409f0dcad9c05ccf639424977a270d8d00` |
-| Snapshot date         | 2026-04-19 |
+| Source commit SHA     | `2858792ef9f5e4bd26a90aa890ac5845b810e8d4` |
+| Snapshot date         | 2026-07-22 |
 | Snapshot author       | DevAgent (automated) |
 
 ## Purpose of this file
@@ -17,7 +17,7 @@ mechanical:
 
 ```bash
 # In the private upstream workspace:
-git diff 072bb6409f0dcad9c05ccf639424977a270d8d00..HEAD -- \
+git diff 2858792ef9f5e4bd26a90aa890ac5845b810e8d4..HEAD -- \
   AGENTS.md SOUL.md IDENTITY.md ARCHITECTURE.md TOOLS.md MEMORY.md skills/
 ```
 

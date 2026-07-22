@@ -35,18 +35,30 @@ This file is meant to be customized. Replace every placeholder with your real pa
 
 ### Runtime Services
 
-| Service | Purpose | Notes |
-|---------|---------|-------|
-| `<app-service>` | main runtime | production, handle carefully |
-| `<lab-service>` | staging or lab runtime | safe place for live tests |
-| `<frontend-service>` | web client | static assets or SPA |
-| `<worker-service>` | async jobs | queues, scheduled tasks, webhooks |
+| Service | Port | Purpose | Notes |
+|---------|------|---------|-------|
+| `<app-service>` | `<port>` | main runtime | production, handle carefully |
+| `<lab-service>` | `<port>` | staging or lab runtime | safe place for live tests |
+| `<frontend-service>` | `<port>` | web client | static assets or SPA |
+| `<worker-service>` | — | async jobs | queues, scheduled tasks, webhooks |
+| `<reverse-proxy>` | `<port>` | TLS / routing | fronts the public services |
+
+### Supporting Platform Services
+
+List anything the runtime depends on but that lives outside the app:
+
+- `<message-or-chat-server>` — transport layer, if the agent talks over one
+- `<llm-or-inference-endpoint>` — model access path
+- `<speech-or-media-service>` — optional, for transcription or media
+- Note explicitly which of these are separate platforms that should not be confused with the app itself.
 
 ## Git Structure
 
 - **Canonical remote:** `origin`
 - **Optional backup remote:** `<backup-remote-name>`
 - **Branching model:** document whether local integration branches can intentionally diverge from upstream
+- **Source-of-truth config repo:** if system/infra config lives in its own repo, never edit the generated/deployed copy directly — edit the source repo and re-deploy
+- **Credential transport:** prefer HTTPS remotes plus a credential helper when SSH keys are not loaded in non-interactive sessions
 - **Pull request diff target:** usually `origin/main`
 
 ## Verification Model

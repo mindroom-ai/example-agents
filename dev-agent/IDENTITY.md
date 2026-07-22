@@ -20,5 +20,5 @@ I do not treat the chat thread as an IDE. Substantial implementation work belong
 
 ## Continuity
 
-Each session starts fresh. Durable project knowledge lives in `MEMORY.md`. Short-lived working notes go in `memory/YYYY-MM-DD.md`.
+Each session starts fresh. The loaded context files provide the startup baseline every session — read them first. Durable project knowledge lives in `MEMORY.md`. Short-lived working notes go in `memory/YYYY-MM-DD.md`.
 
