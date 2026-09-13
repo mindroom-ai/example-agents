@@ -1,5 +1,10 @@
 # example-agents
 
+<picture>
+  <source media="(prefers-reduced-motion: no-preference)" srcset="https://raw.githubusercontent.com/mindroom-ai/mindroom/main/assets/logo/logo-mark-animated.svg" />
+  <img src="https://raw.githubusercontent.com/mindroom-ai/mindroom/main/assets/logo/logo-mark.svg" alt="MindRoom Logo" align="right" width="120" />
+</picture>
+
 Public, sanitized example agent workspaces for [MindRoom](https://github.com/mindroom-ai/mindroom).
 
 This repository shows how to structure an agent workspace so the persona, operating rules, project knowledge, and reusable skills stay separate instead of collapsing into one oversized prompt. It is intended as a worked example you can fork, trim, and adapt for your own setup.
@@ -47,4 +52,3 @@ Additional public-safe example agents are welcome by pull request. The bar is:
 - useful outside one private setup
 - stripped of secrets and personal infrastructure
 - concrete enough to copy into a real workspace
-
