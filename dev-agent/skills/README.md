@@ -10,7 +10,8 @@ Copy the `baspowers` skill directories into this folder as **real directories** 
 
 ```bash
 WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
-TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" && cp -R "$TMP/skills/"* "$WORKSPACE/skills/"
+TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" \
+  && cp -R "$TMP/skills/"* "$WORKSPACE/skills/" && rm -rf "$TMP"
 ```
 
 To update later, run the same command again.

@@ -1,61 +1,91 @@
-# example-agents
+# MindRoom Example Agents
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![MindRoom](https://img.shields.io/badge/MindRoom-docs-blue)](https://docs.mindroom.chat/)
+[![Agents](https://img.shields.io/badge/docs-agents-blue)](https://docs.mindroom.chat/configuration/agents/)
+[![Skills](https://img.shields.io/badge/skills-baspowers-purple)](https://github.com/basnijholt/baspowers)
 
 <picture>
   <source media="(prefers-reduced-motion: no-preference)" srcset="https://raw.githubusercontent.com/mindroom-ai/mindroom/main/assets/logo/logo-mark-animated.svg" />
   <img src="https://raw.githubusercontent.com/mindroom-ai/mindroom/main/assets/logo/logo-mark.svg" alt="MindRoom Logo" align="right" width="120" />
 </picture>
 
-Public, sanitized example agent workspaces for [MindRoom](https://github.com/mindroom-ai/mindroom).
+Public, sanitized example agent workspaces for [MindRoom](https://github.com/mindroom-ai/mindroom) — designed to keep the always-loaded prompt tiny and cache-friendly while workflows, tools, and project knowledge load on demand.
 
-This repository shows how to structure a MindRoom agent workspace so the always-loaded system prompt stays tiny and cache-friendly while workflows, project knowledge, and working notes load on demand. Fork, trim, and adapt it for your own setup.
+- **One preloaded context file:** only `AGENTS.md` and a short `<200`-line `MEMORY.md` load on standard turns.
+- **Composable skills on demand:** built around [`baspowers`](https://github.com/basnijholt/baspowers) (`using-baspowers` loads the right workflow per task).
+- **Native cross-model subagents:** implements on one model and runs independent code reviews on two different model families via `run_subagent`.
 
-## What MindRoom Is
+## Agents
 
-MindRoom is an agent platform that gives long-lived agents structured context, tools, memory, subagents, and skills inside Matrix rooms. This repository does not try to explain the full platform; it shows a practical workspace layout that works well in daily use.
+| Agent | What it does | Workflow | Config |
+|---|---|---|---|
+| **[`dev-agent/`](dev-agent/)** | Autonomous software development agent with worktree isolation, cross-model review loops, PR triage, and PR scoring | [`baspowers`](https://github.com/basnijholt/baspowers) | [`config.yaml`](dev-agent/config.yaml) |
 
-## Repo Layout
+## Workspace at a glance
 
-- `dev-agent/` — a development agent modeled after MindRoom's own `DevAgent`, built around the [`baspowers`](https://github.com/basnijholt/baspowers) skill library and MindRoom's native subagents (`run_subagent` / `continue_subagent`).
-  - `dev-agent/config.yaml` — sample MindRoom `agents:` snippet (single preloaded context file, self-delegation, deferred tools, file memory, skill learning, optional prompt curation).
-  - `dev-agent/AGENTS.md` — the **only** preloaded context file (`context_files: [AGENTS.md]`), holding concise operating rules, delegation/review policy, and hard rules.
-  - `dev-agent/MEMORY.md` — curated, low-churn long-term memory (`<200` lines, preloaded by `memory_backend: file`).
-  - `dev-agent/memory/` — per-thread status logs (`threads-YYYY-MM.md`) and topical notes searched on demand via `memory`.
-  - `dev-agent/ARCHITECTURE.md` and `dev-agent/TOOLS.md` — on-demand project and service references (not preloaded every turn).
-  - `dev-agent/skills/` — workspace skills directory (install `baspowers` here, plus project-specific skills like the included `developing-example-app` template).
+```text
+dev-agent/
+├── config.yaml                  # MindRoom agents.dev snippet (merge into config.yaml)
+├── AGENTS.md                    # ⚡ Standard turns — rules, delegation, review policy
+├── MEMORY.md                    # ⚡ Standard turns (<200 lines) — durable lessons only
+├── ARCHITECTURE.md              # 📖 On demand — repo map, services, test commands
+├── TOOLS.md                     # 📖 On demand — git/forge, browser, secrets notes
+├── memory/
+│   ├── README.md                # 🔍 Recalled & searched — threads-YYYY-MM.md + topics
+│   └── .gitkeep
+├── skills/
+│   ├── README.md                # 🧩 On demand — install baspowers skills here
+│   └── developing-example-app/  #    Starter project-specific workspace skill
+└── .gitignore                   # Keeps local memory notes & .mindroom/ untracked
+```
 
-## The Lean Workspace Pattern
-
-Earlier agent workspaces often preloaded half a dozen persona files (`IDENTITY.md`, `SOUL.md`, `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, `MEMORY.md`) on every turn. That wastes context, multiplies prompt-cache invalidations across parallel threads, and invites conflicting rules.
-
-Instead, this layout separates **always-loaded** from **on-demand**:
-
-| Layer | Loaded when | Purpose |
+| Layer | When it loads | What belongs there |
 |---|---|---|
-| `AGENTS.md` | Every standard turn (`context_files`) | Operating rules, delegation/review policy, reply style, hard rules |
-| `MEMORY.md` | Every standard turn (`memory_backend: file`) | Short (`<200` lines), durable lessons that change rarely |
-| `skills/<name>/SKILL.md` | On demand (`get_skill_instructions`) | Composable workflows (`baspowers`) and project-specific runbooks |
-| `ARCHITECTURE.md`, `TOOLS.md` | On demand (`read_file`) | Repo map, services, commands, and environment caveats |
-| `memory/*.md` | Automatic match recall on standard turns, plus explicit `memory` / `search_memories` | Thread status logs (`threads-YYYY-MM.md`) and deeper topical notes (keyword search by default; optional semantic mode) |
+| [`AGENTS.md`](dev-agent/AGENTS.md) | Every standard turn (`context_files`) | Operating rules, delegation & review policy, reply style, hard rules |
+| [`MEMORY.md`](dev-agent/MEMORY.md) | Every standard turn (`memory_backend: file`) | Curated, low-churn lessons (`<200` lines) |
+| [`skills/`](dev-agent/skills/README.md) | On demand (`get_skill_instructions`) | Composable workflows (`baspowers`) and repo-specific runbooks |
+| [`ARCHITECTURE.md`](dev-agent/ARCHITECTURE.md), [`TOOLS.md`](dev-agent/TOOLS.md) | On demand (`read_file`) | Stack map, service ports, CLI caveats |
+| [`memory/`](dev-agent/memory/README.md) | Auto-recalled matches + `memory` search | Per-thread status (`threads-YYYY-MM.md`) and deeper topic notes |
 
-## How To Use
+## Quick start
 
-1. Copy the contents of `dev-agent/` (including `.gitignore`, excluding `config.yaml`) into your MindRoom agent workspace (for example `~/.mindroom/mindroom_data/agents/dev/workspace/`).
-2. Install the [`baspowers`](https://github.com/basnijholt/baspowers) skills into `"$WORKSPACE/skills/"` as **real directories** (MindRoom does not follow symlinks inside `skills/`):
+1. **Copy the workspace** from the repository root into a new MindRoom agent directory (fails safely if `$WORKSPACE` already exists; keeps `.gitignore`, drops the config snippet):
 
    ```bash
    WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
-   TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" && cp -R "$TMP/skills/"* "$WORKSPACE/skills/"
+   mkdir -p "$(dirname "$WORKSPACE")" && mkdir "$WORKSPACE" \
+     && cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
    ```
 
-   > Prefer manual approval gates at each workflow stage? You can use [obra/superpowers](https://github.com/obra/superpowers) instead — update the bootstrap line in `AGENTS.md` and remove or replace the `baspowers`-only skill references (`consulting-cross-model`, `stopping-runaway-prs`, `scoring-pull-requests`).
+2. **Install `baspowers` skills** as real directories (MindRoom does not follow symlinks inside `skills/`):
 
-3. Merge `dev-agent/config.yaml` into your MindRoom `config.yaml` and replace the placeholder model names, room keys, and Matrix user IDs.
-4. Replace the `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md` with your real repos and commands.
+   ```bash
+   TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" \
+     && cp -R "$TMP/skills/"* "$WORKSPACE/skills/" && rm -rf "$TMP"
+   ```
 
-## Contributing
+3. **Enable the agent:** merge [`dev-agent/config.yaml`](dev-agent/config.yaml) into your MindRoom `config.yaml` (updating `access.users` with your Matrix user ID, plus `model` and `rooms`), then replace `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
 
-Additional public-safe example agents are welcome by pull request. The bar is:
+> [!TIP]
+> Prefer manual approval gates at each workflow stage? Install [obra/superpowers](https://github.com/obra/superpowers) instead, update the opening line of `AGENTS.md`, and remove or replace the `baspowers`-only skill references (`consulting-cross-model`, `stopping-runaway-prs`, `scoring-pull-requests`).
+
+<details>
+<summary><b>Why one context file instead of SOUL.md / IDENTITY.md?</b></summary>
+
+Earlier agent workspaces preloaded five or six persona files (`IDENTITY.md`, `SOUL.md`, `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, `MEMORY.md`) on every turn. That bloats every request, invites contradicting rules, and causes frequent prompt-cache misses across parallel threads whenever status notes are updated.
+
+Keeping `context_files: [AGENTS.md]` plus a `<200`-line `MEMORY.md` keeps every thread's prefix compact and cache-warm, while `baspowers` skills, `ARCHITECTURE.md`, `TOOLS.md`, and `memory/threads-YYYY-MM.md` load only when needed.
+
+</details>
+
+<details>
+<summary><b>Contributing a new example agent</b></summary>
+
+Pull requests for additional public-safe example agents are welcome. Keep submissions:
 
 - useful outside one private setup
-- stripped of secrets, private hostnames, and personal infrastructure
-- concrete enough to copy into a real MindRoom workspace
+- free of secrets, private hostnames, emails, or personal infrastructure
+- concrete enough to copy straight into a real MindRoom workspace
+
+</details>
