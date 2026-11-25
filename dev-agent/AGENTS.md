@@ -12,7 +12,7 @@ Development agent for `<project-name>`. Work by the [`baspowers`](https://github
 
 ## Delegation & Review
 
-Use MindRoom's native `run_subagent` and `continue_subagent` for implementation, independent reviews, and parallel work. Pass `minimal: true` by default; use standard mode only when the child needs approval-gated tools.
+Use MindRoom's native `run_subagent` and `continue_subagent` for implementation, independent reviews, and parallel work. Pass `minimal: true` by default; use standard mode only when the child needs approval-gated tools. Because minimal-mode subagents do not preload `AGENTS.md` or `MEMORY.md`, put critical child constraints (worktree path, read-only rules, no `git stash`, no `env`/`printenv`, shell timeouts) in the task brief or `minimal_instructions`.
 
 - **Implement with `<implementer-model>`** (e.g. a strong coding model with high reasoning). Before Commit 1, inspect the closest sibling file and give the implementer a soft production/test size and reuse target (reuse existing primitives; test user flows and real invariants at roughly 1:1 test:prod rather than mock-permutation sprawl).
 - **Review with `<reviewer-a>` and `<reviewer-b>`** (two models from *different* model families; never have a model review its own code), each a fresh `run_subagent` reviewing the full diff.
@@ -45,6 +45,6 @@ Use MindRoom's native `run_subagent` and `continue_subagent` for implementation,
 - **Git safety:** never commit in, `git reset --hard`, or leave changes in a main checkout. Never force-push. Diff and open PRs against `origin/main`. Never merge, enable auto-merge, or request reviewers unless asked.
 - **Thread hygiene:** if `thread_worktree` / `pull_requests` plugins are enabled, tie the thread to its worktree right after creating it and link the PR as soon as it exists. Resolve no-op automated/trigger threads (`thread_resolution`) when nothing remains to do.
 - **Production safety:** never restart production services without approval. Run live tests in a fresh, throwaway environment — never production — and tear it down afterwards.
-- Prefer `trash` over `rm`.
+- Prefer `trash` over `rm` when available.
 - **Keep `MEMORY.md` cache-stable.** Never write per-thread status notes (worktrees, job IDs, review rounds, next steps) into `MEMORY.md` — append them to `memory/threads-YYYY-MM.md`. `MEMORY.md` is preloaded in every thread, so churning it breaks prompt caches across parallel threads. Update `MEMORY.md` only for durable rules and facts, and keep it under 200 lines.
 - **Edited messages (`m.replace`):** always inspect the latest replacement, never the original pre-edit event.

@@ -16,7 +16,7 @@ Put per-thread status notes (worktrees, job IDs, review rounds, next steps) in `
 
 ## Subagents
 
-- **Isolate reviewers from implementers:** reviewers must inspect the diff read-only — never check out branches in the implementer's worktree, and never call `use_worktree` or `link_pull_request` (which re-ties the parent thread).
+- **Isolate reviewers from implementers:** state in every reviewer brief that the diff is read-only — never check out branches in the implementer's worktree, and never call `use_worktree` or `link_pull_request` (which re-ties the parent thread).
 - **Check output on completion:** if a subagent finishes with empty or truncated text after heavy reasoning, follow up with `continue_subagent` asking for shorter thinking and smaller chunks.
 - **Keep history intact:** cancelling a running subagent job before `continue_subagent` can drop turn context; let a short turn finish or start a fresh `run_subagent` with the full brief.
 - **Background shell limits:** always set `timeout` in subagent shell briefs and tell children never to search `/`.

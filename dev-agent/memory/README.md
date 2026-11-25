@@ -1,6 +1,8 @@
 # Memory Directory
 
-Files in `memory/` are searched semantically on demand by MindRoom's `memory_backend: file` (while `MEMORY.md` at the workspace root is preloaded every turn).
+Files in `memory/` are searched on demand by MindRoom's `memory_backend: file` through the `memory` tool (`search_memories`), while `MEMORY.md` at the workspace root is preloaded on standard turns.
+
+Search uses keyword matching by default. To enable semantic search (and expose `memory/` through `search_knowledge_base`), configure `memory_search: { mode: semantic }` along with a `memory.embedder` in MindRoom's `config.yaml`.
 
 Keeping volatile state here instead of `MEMORY.md` avoids invalidating prompt caches across parallel threads.
 

@@ -16,7 +16,9 @@ agents:
     context_files:
       - AGENTS.md
 
-    # Preloads MEMORY.md and indexes memory/**/*.md for semantic search.
+    # Preloads MEMORY.md and searches memory/**/*.md on demand via `memory`
+    # (keyword search by default; add `memory_search: { mode: semantic }` and a
+    # configured embedder to enable vector / search_knowledge_base retrieval).
     memory_backend: file
 
     # Allow spawning fresh copies of itself via run_subagent / continue_subagent
@@ -46,7 +48,14 @@ agents:
     # file_access: unrestricted
 
     # Optional: isolate shell/coding inside a MindRoom sandbox worker.
+    # Without a worker backend, set top-level `defaults.allow_shell_without_worker: true`
+    # if you intentionally want host shell execution.
     # worker_tools: [shell, coding]
+
+    # Optional: short rules injected into `run_subagent(..., minimal=true)` children,
+    # since minimal-mode subagents do not preload `context_files` or `MEMORY.md`.
+    # minimal_instructions:
+    #   - "Never run env, printenv, or set; never use git stash in shared worktrees."
 
     # Workspace skills under <workspace>/skills/ load automatically without being
     # listed here. Add names below only for bundled, plugin, or ~/.mindroom/skills/.
