@@ -9,8 +9,9 @@ MindRoom automatically loads every valid skill directory under `<workspace>/skil
 Copy the `baspowers` skill directories into this folder as **real directories** (MindRoom does not follow symlinks inside `skills/`):
 
 ```bash
+WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
 git clone --depth 1 https://github.com/basnijholt/baspowers /tmp/baspowers
-cp -R /tmp/baspowers/skills/* <workspace>/skills/
+cp -R /tmp/baspowers/skills/* "$WORKSPACE/skills/"
 ```
 
 To update later, pull `/tmp/baspowers` (or re-clone) and copy `skills/*` again.

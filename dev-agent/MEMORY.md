@@ -2,7 +2,7 @@
 
 Curated long-term rules and durable facts. Keep this file under **200 lines** and change it rarely — it is preloaded into every thread's system prompt, so frequent edits invalidate prompt caches across parallel threads.
 
-Put per-thread status notes (worktrees, job IDs, review rounds, next steps) in `memory/threads-YYYY-MM.md`, and deeper topical notes in `memory/<topic>.md` (searched on demand via `memory_backend: file`).
+Put per-thread status notes (worktrees, job IDs, review rounds, next steps) in `memory/threads-YYYY-MM.md` using file tools (not `add_memory`, which appends to `MEMORY.md`), and deeper topical notes in `memory/<topic>.md` (recalled and searched via `memory_backend: file`).
 
 ## Shell, Git, and Tools
 

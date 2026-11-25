@@ -12,12 +12,13 @@
 
 ## Quick Start
 
-1. Copy the contents of `dev-agent/` (except `config.yaml`) into your agent's MindRoom workspace (e.g. `<storage>/agents/dev/workspace/`).
-2. Install the `baspowers` skills into `<workspace>/skills/` as real directories (MindRoom does not follow symlinks inside `skills/`):
+1. Copy the contents of `dev-agent/` (including `.gitignore`, excluding `config.yaml`) into your agent's MindRoom workspace (e.g. `~/.mindroom/mindroom_data/agents/dev/workspace/`).
+2. Install the `baspowers` skills into `"$WORKSPACE/skills/"` as real directories (MindRoom does not follow symlinks inside `skills/`):
 
    ```bash
+   WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
    git clone --depth 1 https://github.com/basnijholt/baspowers /tmp/baspowers
-   cp -R /tmp/baspowers/skills/* <storage>/agents/dev/workspace/skills/
+   cp -R /tmp/baspowers/skills/* "$WORKSPACE/skills/"
    ```
 
 3. Merge `dev-agent/config.yaml` into your MindRoom `config.yaml`, adjusting `model`, `rooms`, `access`, and any optional plugins.

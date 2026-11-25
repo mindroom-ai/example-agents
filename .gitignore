@@ -2,13 +2,4 @@
 *.swp
 *.swo
 
-# Local memory notes stay untracked by default.
-dev-agent/memory/**/*.md
-!dev-agent/memory/README.md
-!dev-agent/memory/.gitkeep
-
-# MindRoom workspace runtime state.
-dev-agent/.mindroom/
-dev-agent/skills/.usage.json
-dev-agent/skills/.history/
-dev-agent/skills/.archive/
+# Local dev-agent memory and runtime state are ignored by dev-agent/.gitignore.

@@ -31,20 +31,21 @@ Instead, this layout separates **always-loaded** from **on-demand**:
 
 | Layer | Loaded when | Purpose |
 |---|---|---|
-| `AGENTS.md` | Every turn (`context_files`) | Operating rules, delegation/review policy, reply style, hard rules |
-| `MEMORY.md` | Every turn (`memory_backend: file`) | Short (`<200` lines), durable lessons that change rarely |
+| `AGENTS.md` | Every standard turn (`context_files`) | Operating rules, delegation/review policy, reply style, hard rules |
+| `MEMORY.md` | Every standard turn (`memory_backend: file`) | Short (`<200` lines), durable lessons that change rarely |
 | `skills/<name>/SKILL.md` | On demand (`get_skill_instructions`) | Composable workflows (`baspowers`) and project-specific runbooks |
 | `ARCHITECTURE.md`, `TOOLS.md` | On demand (`read_file`) | Repo map, services, commands, and environment caveats |
-| `memory/*.md` | On demand (`memory` / `search_memories`) | Thread status logs (`threads-YYYY-MM.md`) and deeper topical notes (keyword search by default; optional semantic mode) |
+| `memory/*.md` | Automatic match recall on standard turns, plus explicit `memory` / `search_memories` | Thread status logs (`threads-YYYY-MM.md`) and deeper topical notes (keyword search by default; optional semantic mode) |
 
 ## How To Use
 
-1. Copy the contents of `dev-agent/` (except `config.yaml`) into your MindRoom agent workspace (for example `~/.mindroom/mindroom_data/agents/dev/workspace/`).
-2. Install the [`baspowers`](https://github.com/basnijholt/baspowers) skills into `<workspace>/skills/` as **real directories** (MindRoom does not follow symlinks inside `skills/`):
+1. Copy the contents of `dev-agent/` (including `.gitignore`, excluding `config.yaml`) into your MindRoom agent workspace (for example `~/.mindroom/mindroom_data/agents/dev/workspace/`).
+2. Install the [`baspowers`](https://github.com/basnijholt/baspowers) skills into `"$WORKSPACE/skills/"` as **real directories** (MindRoom does not follow symlinks inside `skills/`):
 
    ```bash
+   WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
    git clone --depth 1 https://github.com/basnijholt/baspowers /tmp/baspowers
-   cp -R /tmp/baspowers/skills/* <workspace>/skills/
+   cp -R /tmp/baspowers/skills/* "$WORKSPACE/skills/"
    ```
 
    > Prefer manual approval gates at each workflow stage? You can use [obra/superpowers](https://github.com/obra/superpowers) instead — update the bootstrap line in `AGENTS.md` and remove or replace the `baspowers`-only skill references (`consulting-cross-model`, `stopping-runaway-prs`, `scoring-pull-requests`).
