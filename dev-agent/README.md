@@ -19,7 +19,7 @@ flowchart LR
     I --> R["Parallel review<br/>(fresh models B & C)"]
     R -->|Blocking issue| F["Triage & fix<br/>(cap: 3 rounds)"]
     F --> R
-    R -->|All approved| S["Score PR & open"]
+    R -->|All approved| S["Score PR & report ready"]
 ```
 
 ## What's inside
@@ -36,12 +36,12 @@ flowchart LR
 
 ## Quick start
 
-1. **Copy the workspace** from the repository root (includes `.gitignore`, drops `config.yaml`):
+1. **Copy the workspace** from the repository root into a new MindRoom agent directory (fails safely if `$WORKSPACE` already exists; keeps `.gitignore`, drops the config snippet):
 
    ```bash
    WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
-   mkdir -p "$WORKSPACE"
-   cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
+   mkdir -p "$(dirname "$WORKSPACE")" && mkdir "$WORKSPACE" \
+     && cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
    ```
 
 2. **Install `baspowers` skills** as real directories (MindRoom does not follow symlinks inside `skills/`):
@@ -51,7 +51,7 @@ flowchart LR
      && cp -R "$TMP/skills/"* "$WORKSPACE/skills/" && rm -rf "$TMP"
    ```
 
-3. **Wire it up:** merge [`config.yaml`](config.yaml) into your MindRoom `config.yaml`, then customize `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
+3. **Wire it up:** merge [`config.yaml`](config.yaml) into your MindRoom `config.yaml` (updating `access.users` with your Matrix user ID, plus `model` and `rooms`), then customize `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
 
 <details>
 <summary><b>Key behaviors built into AGENTS.md</b></summary>

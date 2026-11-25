@@ -27,8 +27,8 @@ Public, sanitized example agent workspaces for [MindRoom](https://github.com/min
 ```text
 dev-agent/
 ├── config.yaml                  # MindRoom agents.dev snippet (merge into config.yaml)
-├── AGENTS.md                    # ⚡ Always loaded — rules, delegation, review policy
-├── MEMORY.md                    # ⚡ Always loaded (<200 lines) — durable lessons only
+├── AGENTS.md                    # ⚡ Standard turns — rules, delegation, review policy
+├── MEMORY.md                    # ⚡ Standard turns (<200 lines) — durable lessons only
 ├── ARCHITECTURE.md              # 📖 On demand — repo map, services, test commands
 ├── TOOLS.md                     # 📖 On demand — git/forge, browser, secrets notes
 ├── memory/
@@ -50,12 +50,12 @@ dev-agent/
 
 ## Quick start
 
-1. **Copy the workspace** into your MindRoom agent directory (keeps `.gitignore`, drops the config snippet):
+1. **Copy the workspace** from the repository root into a new MindRoom agent directory (fails safely if `$WORKSPACE` already exists; keeps `.gitignore`, drops the config snippet):
 
    ```bash
    WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
-   mkdir -p "$WORKSPACE"
-   cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
+   mkdir -p "$(dirname "$WORKSPACE")" && mkdir "$WORKSPACE" \
+     && cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
    ```
 
 2. **Install `baspowers` skills** as real directories (MindRoom does not follow symlinks inside `skills/`):
@@ -65,7 +65,7 @@ dev-agent/
      && cp -R "$TMP/skills/"* "$WORKSPACE/skills/" && rm -rf "$TMP"
    ```
 
-3. **Enable the agent:** merge [`dev-agent/config.yaml`](dev-agent/config.yaml) into your MindRoom `config.yaml`, then replace `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
+3. **Enable the agent:** merge [`dev-agent/config.yaml`](dev-agent/config.yaml) into your MindRoom `config.yaml` (updating `access.users` with your Matrix user ID, plus `model` and `rooms`), then replace `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
 
 > [!TIP]
 > Prefer manual approval gates at each workflow stage? Install [obra/superpowers](https://github.com/obra/superpowers) instead, update the opening line of `AGENTS.md`, and remove or replace the `baspowers`-only skill references (`consulting-cross-model`, `stopping-runaway-prs`, `scoring-pull-requests`).
