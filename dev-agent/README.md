@@ -1,24 +1,65 @@
 # DevAgent
 
-`dev-agent/` is a worked example of a MindRoom development agent built around the [`baspowers`](https://github.com/basnijholt/baspowers) skill library and MindRoom's native subagents (`run_subagent` / `continue_subagent`).
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](../LICENSE)
+[![Agents](https://img.shields.io/badge/docs-agents-blue)](https://docs.mindroom.chat/configuration/agents/)
+[![Skills](https://img.shields.io/badge/skills-baspowers-purple)](https://github.com/basnijholt/baspowers)
 
-## How It Works
+<picture>
+  <source media="(prefers-reduced-motion: no-preference)" srcset="https://raw.githubusercontent.com/mindroom-ai/mindroom/main/assets/logo/logo-mark-animated.svg" />
+  <img src="https://raw.githubusercontent.com/mindroom-ai/mindroom/main/assets/logo/logo-mark.svg" alt="MindRoom Logo" align="right" width="120" />
+</picture>
 
-- **Minimal always-loaded prompt:** On standard turns, only `AGENTS.md` (via `context_files`) and a short `MEMORY.md` (via `memory_backend: file`) are preloaded. Workflow protocols live in `skills/`, and stack/service details live in `ARCHITECTURE.md` and `TOOLS.md` to be read on demand. Minimal-mode subagents skip preloaded context files and receive only the task brief (plus optional `minimal_instructions`).
-- **Skill-driven workflow (`baspowers`):** At the start of each task, the agent loads `using-baspowers` and follows the matching process skills (`brainstorming`, `writing-plans`, `systematic-debugging`, `test-driven-development`, `subagent-driven-development`, `requesting-code-review`, `stopping-runaway-prs`, `scoring-pull-requests`, `verification-before-completion`, and others).
-- **Native cross-model subagents:** With `delegate_to: [dev]`, the agent spawns fresh copies of itself using `run_subagent(..., minimal=true)` — implementing on one model and running independent code reviews on two models from different families, with clear blocking criteria and a stop-and-simplify cap.
-- **Deferred tools:** Frequently used tools (`shell`, `coding`, `matrix_message`) stay loaded; everything else (`todo`, `memory`, `browser`, `scheduler`, `workflow`, thread tools, secret helpers) loads on demand with `defer: true`.
-- **Cache-friendly memory:** `MEMORY.md` stays under ~200 lines for durable rules only, while per-thread status notes go in `memory/threads-YYYY-MM.md` so editing status does not cold-rewrite prompt caches across parallel threads.
+A MindRoom development agent modeled after MindRoom's live `DevAgent` — driven by [`baspowers`](https://github.com/basnijholt/baspowers) skills, native cross-model subagents (`run_subagent`), deferred tools, and cache-stable file memory.
 
-## Quick Start
+```mermaid
+flowchart LR
+    T["Task"] --> B["Load using-baspowers"]
+    B --> W["Git worktree"]
+    W --> I["Implement<br/>(subagent model A)"]
+    I --> R["Parallel review<br/>(fresh models B & C)"]
+    R -->|Blocking issue| F["Triage & fix<br/>(cap: 3 rounds)"]
+    F --> R
+    R -->|All approved| S["Score PR & open"]
+```
 
-1. Copy the contents of `dev-agent/` (including `.gitignore`, excluding `config.yaml`) into your agent's MindRoom workspace (e.g. `~/.mindroom/mindroom_data/agents/dev/workspace/`).
-2. Install the `baspowers` skills into `"$WORKSPACE/skills/"` as real directories (MindRoom does not follow symlinks inside `skills/`):
+## What's inside
+
+| File | Loaded | Purpose |
+|---|---|---|
+| [`config.yaml`](config.yaml) | Config snippet | MindRoom `agents.dev` setup: self-delegation, deferred tools, file memory, `skill_learning`, `room_activity` |
+| [`AGENTS.md`](AGENTS.md) | Every standard turn | Core operating rules, cross-model delegation & review protocol, reply style, hard rules |
+| [`MEMORY.md`](MEMORY.md) | Every standard turn | Curated `<200`-line operational lessons (shell/git safety, subagent hygiene, review heuristics) |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | On demand | Project repos, service ports, verification model |
+| [`TOOLS.md`](TOOLS.md) | On demand | Git/forge brokering, browser automation, secrets rules |
+| [`skills/`](skills/README.md) | On demand | `baspowers` install guide + starter [`developing-example-app`](skills/developing-example-app/SKILL.md) skill |
+| [`memory/`](memory/README.md) | Recall & search | Monthly thread logs (`threads-YYYY-MM.md`) and deeper topic notes |
+
+## Quick start
+
+1. **Copy the workspace** from the repository root (includes `.gitignore`, drops `config.yaml`):
 
    ```bash
    WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
-   TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" && cp -R "$TMP/skills/"* "$WORKSPACE/skills/"
+   mkdir -p "$WORKSPACE"
+   cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
    ```
 
-3. Merge `dev-agent/config.yaml` into your MindRoom `config.yaml`, adjusting `model`, `rooms`, `access`, and any optional plugins.
-4. Customize `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md` for your repositories and toolchain.
+2. **Install `baspowers` skills** as real directories (MindRoom does not follow symlinks inside `skills/`):
+
+   ```bash
+   TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" \
+     && cp -R "$TMP/skills/"* "$WORKSPACE/skills/" && rm -rf "$TMP"
+   ```
+
+3. **Wire it up:** merge [`config.yaml`](config.yaml) into your MindRoom `config.yaml`, then customize `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
+
+<details>
+<summary><b>Key behaviors built into AGENTS.md</b></summary>
+
+- **Minimal always-loaded prompt:** only `AGENTS.md` and `MEMORY.md` preload on standard turns. Minimal-mode subagents (`run_subagent(..., minimal=true)`) skip preloaded files and receive explicit constraints via the task brief or `minimal_instructions`.
+- **Cross-model separation:** never has a model review its own code; pairs one implementer model with fresh reviewers from two distinct model families, plus a blind fresh re-reviewer after fixes.
+- **Anti-bloat triage & cap:** distinguishes real bugs/regressions from contrived edge cases (declined in a 1-line PR note), and triggers `stopping-runaway-prs` after 2 consecutive rounds with new Majors or 3 rounds total.
+- **Deferred tools:** keeps `shell`, `coding`, and `matrix_message` loaded and defers secondary tools (`todo`, `memory`, `browser`, `scheduler`, `workflow`, thread tools, secret helpers) with `defer: true`.
+- **Cache-friendly memory:** thread status notes go into `memory/threads-YYYY-MM.md` instead of churning `MEMORY.md`, keeping prompt caches warm across parallel threads.
+
+</details>
