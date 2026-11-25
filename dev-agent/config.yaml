@@ -1,0 +1,101 @@
+# Sample MindRoom agent configuration for DevAgent.
+# Merge under top-level `agents:` in your MindRoom `config.yaml` and replace
+# `<placeholders>` with your own models, rooms, and Matrix user IDs.
+
+agents:
+  dev:
+    display_name: DevAgent
+    role: "Development agent for <project>, working by the baspowers skills."
+    model: default  # Key from top-level `models:` (e.g. opus, sonnet, gpt, gemini)
+    rooms:
+      - dev
+    thread_mode: thread
+    include_default_tools: false
+
+    # Preload only AGENTS.md; ARCHITECTURE.md and TOOLS.md are read on demand.
+    context_files:
+      - AGENTS.md
+
+    # Preloads MEMORY.md and searches memory/**/*.md on demand via `memory`
+    # (keyword search by default; add `memory_search: { mode: semantic }` and a
+    # configured embedder to enable vector / search_knowledge_base retrieval).
+    memory_backend: file
+
+    # Allow spawning fresh copies of itself via run_subagent / continue_subagent
+    # (for cross-model implementation, independent code review, and parallel work).
+    delegate_to:
+      - dev
+
+    # Let the agent refine workspace skills and stay aware of sibling threads.
+    skill_learning:
+      enabled: true
+    room_activity:
+      enabled: true
+
+    # Optional: periodic curation to keep always-loaded prompt files concise.
+    # automations:
+    #   - name: prompt_curation
+    #     model: local  # Cheap/local model key from `models:`
+
+    # Restrict who can converse with an agent that has shell/file access.
+    access:
+      current_room_members: false
+      members_of_rooms: []
+      users:
+        - "@you:example.org"
+
+    # Uncomment if the agent works on repositories outside its workspace directory.
+    # file_access: unrestricted
+
+    # Optional: isolate shell/coding inside a MindRoom sandbox worker.
+    # Without a worker backend, set top-level `defaults.allow_shell_without_worker: true`
+    # if you intentionally want host shell execution.
+    # worker_tools: [shell, coding]
+
+    # Optional: short rules injected into `run_subagent(..., minimal=true)` children,
+    # since minimal-mode subagents do not preload `context_files` or `MEMORY.md`.
+    # minimal_instructions:
+    #   - "Never run env, printenv, or set; never use git stash in shared worktrees."
+
+    # Workspace skills under <workspace>/skills/ load automatically without being
+    # listed here. Add names below only for bundled, plugin, or ~/.mindroom/skills/.
+    skills: []
+
+    # Keep high-frequency tools loaded; defer the rest to keep the prompt small.
+    tools:
+      - shell
+      - coding
+      - matrix_message
+      - todo:
+          defer: true
+      - memory:
+          defer: true
+      - browser:
+          defer: true
+      - scheduler:
+          defer: true
+      - workflow:
+          defer: true
+      - website:
+          defer: true
+      - matrix_room:
+          defer: true
+      - thread_tags:
+          defer: true
+      - thread_resolution:
+          defer: true
+      - thread_summary:
+          defer: true
+      - thread_snooze:
+          defer: true
+      - compact_context:
+          defer: true
+      - egress_credentials:
+          defer: true
+      - temporary_secrets:
+          defer: true
+      # Optional MindRoom plugins (install plugin first, then uncomment):
+      # - pull_requests:    # https://github.com/mindroom-ai/pull-request-plugin
+      #     defer: true
+      # - thread_worktree:  # https://github.com/mindroom-ai/thread-worktree-plugin
+      #     defer: true

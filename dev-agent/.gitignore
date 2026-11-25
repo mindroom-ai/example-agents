@@ -1,0 +1,14 @@
+.DS_Store
+*.swp
+*.swo
+
+# Local memory notes stay untracked by default.
+memory/**/*.md
+!memory/README.md
+!memory/.gitkeep
+
+# MindRoom workspace runtime state.
+.mindroom/
+skills/.usage.json
+skills/.history/
+skills/.archive/

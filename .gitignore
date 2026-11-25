@@ -2,27 +2,4 @@
 *.swp
 *.swo
 
-# Daily memory stays local by default.
-dev-agent/memory/*.md
-!dev-agent/memory/README.md
-!dev-agent/memory/.gitkeep
-
-# Common agent artifacts.
-PLAN.md
-PLAN-*.md
-DEBATE.md
-DEBATE-*.md
-REPORT.md
-REPORT-*.md
-REVIEW-*.md
-REREVIEW-*.md
-REVIEW_FINDINGS.md
-REFACTOR-VERDICT.md
-LIVE-TEST-OUTPUT.txt
-.beads/
-
-# Shared Claude-style scratch state.
-.claude/TASK.md
-.claude/REPORT.md
-.claude/PLAN.md
-
+# Local dev-agent memory and runtime state are ignored by dev-agent/.gitignore.

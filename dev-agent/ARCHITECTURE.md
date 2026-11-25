@@ -1,80 +1,49 @@
-# ARCHITECTURE.md — Project Stack Template
+# ARCHITECTURE.md — Project Stack Reference (On-Demand)
 
-This file is meant to be customized. Replace every placeholder with your real paths, services, and constraints.
+This file is **not** preloaded every turn. Read it with `read_file` when working on cross-component changes, deployments, or unfamiliar repos. Replace every `<placeholder>` with your real paths, services, and commands.
 
 ## Overview
 
-`<project-name>` is the primary codebase this agent helps develop. The agent may also work across a frontend, shared libraries, infrastructure configuration, and deployment automation.
+`<project-name>` is the primary codebase this agent develops. Document how the backend, client, shared libraries, and infrastructure repositories relate so neither the main agent nor subagents guess paths.
 
-## Components
+## Repositories & Commands
 
-### Core Application
+### Backend / Core Application
 
-- **Source:** `<project-root>`
-- **Worktrees:** `<worktree-root>`
-- **Primary branch:** `<main-branch>`
-- **Run command:** `<run-command>`
-- **Tests:** `<test-command>`
-- **Config:** `<config-path>`
-- **Data:** `<data-path>`
+- **Source:** `<repos-root>/<backend-repo>`
+- **Worktrees:** `<worktrees-root>/<backend-repo>-<topic>`
+- **Primary branch:** `origin/main`
+- **Dev run:** `<backend-run-command>`
+- **Tests:** `<backend-test-command>`
+- **Lint / typecheck:** `<backend-lint-command>`
+- **Deploy checkout (do not develop here):** `<backend-deploy-checkout>`
 
-### Web Or Client App
+### Web / Client App (Optional)
 
-- **Source:** `<frontend-root>`
-- **Build command:** `<frontend-build-command>`
-- **Tests:** `<frontend-test-command>`
-- **Service:** `<frontend-service-name>`
-- **Live test URL:** `<frontend-url>`
+- **Source:** `<repos-root>/<client-repo>`
+- **Worktrees:** `<worktrees-root>/<client-repo>-<topic>`
+- **Build:** `<client-build-command>`
+- **Unit tests:** `<client-test-command>`
+- **E2E / screenshot tests:** `<client-e2e-command>`
 
-### Infrastructure Or Config Repository
+### Infrastructure / Deployment Repo (Optional)
 
-- **Source:** `<infra-root>`
-- **Deploy command:** `<deploy-command>`
-- **Important modules:** `<infra-modules>`
-- **Secrets system:** `<secret-manager>`
+- **Source:** `<repos-root>/<infra-repo>`
+- **Deploy / rebuild:** `<deploy-command>`
+- **Secrets manager:** `<secrets-system>`
 
-### Runtime Services
+## Services
 
-| Service | Port | Purpose | Notes |
-|---------|------|---------|-------|
-| `<app-service>` | `<port>` | main runtime | production, handle carefully |
-| `<lab-service>` | `<port>` | staging or lab runtime | safe place for live tests |
-| `<frontend-service>` | `<port>` | web client | static assets or SPA |
-| `<worker-service>` | — | async jobs | queues, scheduled tasks, webhooks |
-| `<reverse-proxy>` | `<port>` | TLS / routing | fronts the public services |
-
-### Supporting Platform Services
-
-List anything the runtime depends on but that lives outside the app:
-
-- `<message-or-chat-server>` — transport layer, if the agent talks over one
-- `<llm-or-inference-endpoint>` — model access path
-- `<speech-or-media-service>` — optional, for transcription or media
-- Note explicitly which of these are separate platforms that should not be confused with the app itself.
-
-## Git Structure
-
-- **Canonical remote:** `origin`
-- **Optional backup remote:** `<backup-remote-name>`
-- **Branching model:** document whether local integration branches can intentionally diverge from upstream
-- **Source-of-truth config repo:** if system/infra config lives in its own repo, never edit the generated/deployed copy directly — edit the source repo and re-deploy
-- **Credential transport:** prefer HTTPS remotes plus a credential helper when SSH keys are not loaded in non-interactive sessions
-- **Pull request diff target:** usually `origin/main`
+| Service | Port | Environment | Safe for agent to restart? |
+|---|---|---|---|
+| `<app-prod-service>` | `<port>` | production | No — ask human first |
+| `<app-staging-service>` | `<port>` | staging / lab | Yes (if configured) |
+| `<frontend-service>` | `<port>` | web client | `<yes/no>` |
+| `<reverse-proxy>` | `80/443` | TLS / routing | No — ask human first |
 
 ## Verification Model
 
-- **Unit tests:** fast local correctness checks
-- **Integration tests:** cross-service behavior
-- **Live tests:** real-environment validation with screenshots or terminal evidence
-- **Human approval:** final go/no-go after the agent marks `APPROVAL PENDING`
-
-## Local Notes
-
-Document the facts agents repeatedly need:
-
-- where worktrees live
-- which service is safe to restart
-- how to run the real app locally
-- where browser-based verification happens
-- which branches are shared and must not be rewritten
-
+- **Unit & integration tests:** run in the worktree before opening or updating a PR.
+- **Live / end-to-end tests:** run against a fresh, throwaway deployment built from the worktree (never production) and tear it down afterwards.
+- **UI changes:** capture before/after screenshots with invented placeholder data and inspect them before opening a PR.
+- **Cross-model review:** two independent model families review the full diff against `origin/main`; PR is scored with `scoring-pull-requests` before reporting ready.
