@@ -8,7 +8,7 @@ Put per-thread status notes (worktrees, job IDs, review rounds, next steps) in `
 
 - **Never `git stash` in shared worktrees:** `refs/stash` is shared across every worktree of the same repository. Use a temporary commit or patch file instead, and tell subagents the same.
 - **Never dump the environment:** if live tokens or broker credentials exist in shell env vars, never run `env`, `printenv`, `set`, or `env | grep` — include that rule in every subagent brief.
-- **Protect the runtime venv:** if the agent shell inherits `VIRTUAL_ENV` from the MindRoom runtime, always `unset VIRTUAL_ENV` or target the worktree's virtualenv explicitly before installing packages so you never mutate the host runtime.
+- **Protect the runtime venv:** if the agent shell inherits `VIRTUAL_ENV` (or a runtime venv on `PATH`) from MindRoom, always target the worktree's virtualenv/interpreter explicitly (and `unset VIRTUAL_ENV`) before installing packages so you never mutate the host runtime.
 - **File edits:** use `edit_file` (or single-match checks when running in minimal bash-only mode) and review `git diff` afterwards.
 - **Shell scripts:** under `set -e`, a failing non-final `&&` command does not abort; put each step on its own line. Guards must fail closed (empty checker output = stop).
 - **Config edits:** back up live config before editing, write via temp file + atomic `mv` (never truncate in place), and validate before saving.

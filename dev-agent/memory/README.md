@@ -1,8 +1,8 @@
 # Memory Directory
 
-Files in `memory/` are indexed by MindRoom's `memory_backend: file` (matching snippets can be recalled automatically on standard turns, and searched explicitly with `memory` / `search_memories`), while `MEMORY.md` at the workspace root is preloaded in full on standard turns.
+Files in `memory/` are indexed by MindRoom's `memory_backend: file` (matching snippets can be recalled automatically on standard turns, and searched explicitly with `memory` / `search_memories`), while `MEMORY.md` at the workspace root is preloaded on standard turns (up to the configured preload limit).
 
-Search uses keyword matching by default. To enable semantic search (and expose `memory/` through `search_knowledge_base`), configure `memory_search: { mode: semantic }` along with a `memory.embedder` in MindRoom's `config.yaml`.
+Search uses keyword matching by default (which sees direct file edits immediately). To enable semantic search (and expose `memory/` through `search_knowledge_base`), configure `memory_search: { mode: semantic }` along with a `memory.embedder` in MindRoom's `config.yaml` — when using semantic mode, read `threads-YYYY-MM.md` directly when up-to-the-minute status matters, since direct edits are not reflected until the semantic index refreshes.
 
 Keeping volatile state here instead of `MEMORY.md` avoids invalidating prompt caches across parallel threads.
 

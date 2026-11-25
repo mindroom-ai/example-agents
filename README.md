@@ -44,8 +44,7 @@ Instead, this layout separates **always-loaded** from **on-demand**:
 
    ```bash
    WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
-   git clone --depth 1 https://github.com/basnijholt/baspowers /tmp/baspowers
-   cp -R /tmp/baspowers/skills/* "$WORKSPACE/skills/"
+   TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" && cp -R "$TMP/skills/"* "$WORKSPACE/skills/"
    ```
 
    > Prefer manual approval gates at each workflow stage? You can use [obra/superpowers](https://github.com/obra/superpowers) instead — update the bootstrap line in `AGENTS.md` and remove or replace the `baspowers`-only skill references (`consulting-cross-model`, `stopping-runaway-prs`, `scoring-pull-requests`).

@@ -17,8 +17,7 @@
 
    ```bash
    WORKSPACE=~/.mindroom/mindroom_data/agents/dev/workspace
-   git clone --depth 1 https://github.com/basnijholt/baspowers /tmp/baspowers
-   cp -R /tmp/baspowers/skills/* "$WORKSPACE/skills/"
+   TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" && cp -R "$TMP/skills/"* "$WORKSPACE/skills/"
    ```
 
 3. Merge `dev-agent/config.yaml` into your MindRoom `config.yaml`, adjusting `model`, `rooms`, `access`, and any optional plugins.
