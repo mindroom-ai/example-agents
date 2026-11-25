@@ -1,95 +1,35 @@
-# MEMORY.md — Long-Term Memory Template
+# MEMORY.md
 
-This file is for facts that should survive across sessions. Keep it curated. If something is only useful today, put it in `memory/YYYY-MM-DD.md` instead.
+Curated long-term rules and durable facts. Keep this file under **200 lines** and change it rarely — it is preloaded into every thread's system prompt, so frequent edits invalidate prompt caches across parallel threads.
 
-## Operator Preferences
+Put per-thread status notes (worktrees, job IDs, review rounds, next steps) in `memory/threads-YYYY-MM.md`, and deeper topical notes in `memory/<topic>.md` (searched on demand via `memory_backend: file`).
 
-- builder-first
-- evidence over intuition
-- clear diffs over elaborate explanations
-- minimalism over speculative flexibility
-- direct communication over soft framing
-- if it matters later, write it to a file
+## Shell, Git, and Tools
 
-## Project Rules Worth Remembering
+- **Never `git stash` in shared worktrees:** `refs/stash` is shared across every worktree of the same repository. Use a temporary commit or patch file instead, and tell subagents the same.
+- **Never dump the environment:** if live tokens or broker credentials exist in shell env vars, never run `env`, `printenv`, `set`, or `env | grep` — include that rule in every subagent brief.
+- **Protect the runtime venv:** if the agent shell inherits `VIRTUAL_ENV` from the MindRoom runtime, always `unset VIRTUAL_ENV` or target the worktree's virtualenv explicitly before installing packages so you never mutate the host runtime.
+- **File edits:** use `edit_file` (or single-match checks when running in minimal bash-only mode) and review `git diff` afterwards.
+- **Shell scripts:** under `set -e`, a failing non-final `&&` command does not abort; put each step on its own line. Guards must fail closed (empty checker output = stop).
+- **Config edits:** back up live config before editing, write via temp file + atomic `mv` (never truncate in place), and validate before saving.
+- **Timeouts:** set explicit timeouts on slow or hang-prone commands; never sleep-poll in repeated turns.
 
-- live test is a hard gate before merge
-- plan first, then implementation
-- use `schedule()` instead of sleep-polling
-- never force-push shared branches
-- never hard-reset shared integration branches
-- final approval needs a fresh review pass on the final SHA
-- if a backup remote exists, push the approved review branch there before merge
+## Subagents
 
-## Architecture Notes
+- **Isolate reviewers from implementers:** reviewers must inspect the diff read-only — never check out branches in the implementer's worktree, and never call `use_worktree` or `link_pull_request` (which re-ties the parent thread).
+- **Check output on completion:** if a subagent finishes with empty or truncated text after heavy reasoning, follow up with `continue_subagent` asking for shorter thinking and smaller chunks.
+- **Keep history intact:** cancelling a running subagent job before `continue_subagent` can drop turn context; let a short turn finish or start a fresh `run_subagent` with the full brief.
+- **Background shell limits:** always set `timeout` in subagent shell briefs and tell children never to search `/`.
 
-Document only stable facts here:
+## Engineering & Review Lessons
 
-- repo roots and worktree roots
-- safe vs unsafe services to restart
-- branch model and merge rules
-- recurring failure modes
-- benchmarks or measurements that changed decisions
+- **One cohesive PR per feature, not a stack of tiny PRs:** group related phases as commits on one branch and review the whole diff at milestones.
+- **Confirm the cause before designing:** reproduce bugs with a real trace, log, or screenshot before writing a plan or fix. When a derived status is wrong, audit every writer of that state and establish one source of truth instead of bolting on another layer.
+- **Stop at no-regression vs `main`:** state in Round 1 review briefs that parity-with-`main` edge cases are non-blocking comments; decline pre-existing edge cases in a 1-line PR note instead of adding defensive machinery.
+- **Re-check scope when a "small" change grows:** soft size targets are fine to exceed slightly (~10–15%), but if a small fix balloons well past its estimate or triggers repeated review rounds, pause and run `stopping-runaway-prs`.
+- **Parallel sessions move `main`:** before fixing and again before pushing, `git fetch`, check `git log origin/main -- <touched files>`, and check open PRs for overlapping work.
+- **Mocked unit tests miss seam bugs:** when unit tests mock across a module boundary, verify the real integration or end-to-end flow before declaring a change done.
 
-## Review And Performance Heuristics
+## Project Notes
 
-- performance work requires a preserved before-and-after benchmark, not theoretical claims alone
-- if multiple review rounds keep finding the same bug class, stop patching symptoms and question the abstraction
-- when several reports exist, synthesize them into one recommendation instead of asking the operator to arbitrate raw reviewer output
-- filter reviewer feedback: forward real correctness bugs and missing tests, drop speculative hardening and hypothetical edge cases
-
-## Boundary Patterns
-
-- if the repo uses interface-enforcement tooling, keep the declared public surface and the package export surface in sync
-- once a boundary exists, route cross-domain imports through the package root instead of private internals
-
-## Live Test Is A Hard Gate — No Exceptions
-
-- reviewer approvals only confirm "the code does what the plan says" — they say nothing about whether the plan solves the user's actual problem
-- never bypass the live test because approvals look sufficient; the orchestrator runs the live test and attaches evidence before merge
-- reproduction-first: before planning a bug fix, capture a real repro of the reported symptom (recording, trace, screenshot) and make all planners and reviewers work against that repro, not a written description
-- include the original bug report verbatim in the reviewer prompt so reviewers can check spec-vs-bug, not just code-vs-spec
-- if you cannot personally observe the reported symptom in a repro, stop and ask for one — do not let theoretical planning fill the evidence gap
-
-## Inspect The Real Artifact, Not A Stale Copy
-
-- when a system edits records in place (message edits, versioned documents, cached snapshots), the first thing you fetch is often the original, not what the user actually sees
-- always resolve to the latest version before analyzing a rendering or content bug; a fix built on the pre-edit artifact investigates the wrong data
-- self-check before any content/rendering investigation: "am I looking at the exact bytes the user sees right now?"
-
-## Tool-Call Discipline
-
-- set an explicit generous timeout up front for known-slow commands (test suites, builds, full-tree searches, first-time dependency installs); the default timeout wastes a turn and backgrounds the process
-- run ad-hoc scripts through the project's environment/venv, not a bare interpreter, or you hit missing-dependency errors
-- if a known tool reports "command not found" or an env var is missing, fix it structurally in config (PATH/env passthrough) rather than working around it every call
-- silent failures (a call returns success while the body carries an error) usually outnumber hard failures by a wide margin — inspect result bodies, don't trust the status flag alone
-
-## Spawn From The Right Directory, With Distinct Session Names
-
-- worktree/agent spawn tools resolve the source repo from the current working directory — `cd` into the actual project root first, or you create a worktree of the wrong repo
-- give the implementer session a distinct name from reviewer sessions (e.g. `<branch>-impl` vs `<branch>-rev-*`); overlapping names let a new agent hijack the running one
-
-## Skills In This Workspace
-
-### agent-cli-dev
-
-Spawning and managing coding agents in git worktrees.
-
-### project-dev
-
-Full lifecycle issue handling: plan, debate, implement, review, live test, merge, report.
-
-### parallel-review-loop
-
-Large review-fix loops with one persistent implementer and multiple reviewers.
-
-### transcribe
-
-Audio transcription through a local or self-hosted speech-to-text endpoint with a cloud fallback.
-
-## How To Maintain This File
-
-- promote stable lessons from daily notes into this file
-- rewrite war stories into reusable rules
-- delete stale facts instead of accumulating them forever
-
+Add stable, high-value facts specific to your stack here (build quirks, CI timings, known pitfalls), and delete entries once they become obsolete.

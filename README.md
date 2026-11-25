@@ -7,48 +7,55 @@
 
 Public, sanitized example agent workspaces for [MindRoom](https://github.com/mindroom-ai/mindroom).
 
-This repository shows how to structure an agent workspace so the persona, operating rules, project knowledge, and reusable skills stay separate instead of collapsing into one oversized prompt. It is intended as a worked example you can fork, trim, and adapt for your own setup.
+This repository shows how to structure a MindRoom agent workspace so the always-loaded system prompt stays tiny and cache-friendly while workflows, project knowledge, and working notes load on demand. Fork, trim, and adapt it for your own setup.
 
 ## What MindRoom Is
 
-MindRoom is an agent platform that lets you give long-lived agents structured context, tools, memory, and skills. This repository does not try to explain the full platform; it shows one practical workspace pattern that fits well inside it.
+MindRoom is an agent platform that gives long-lived agents structured context, tools, memory, subagents, and skills inside Matrix rooms. This repository does not try to explain the full platform; it shows a practical workspace layout that works well in daily use.
 
 ## Repo Layout
 
-- `dev-agent/` contains the first example agent, a development orchestrator that manages coding agents, review loops, reports, and live-test gates.
-- `dev-agent/IDENTITY.md` defines who the agent is.
-- `dev-agent/SOUL.md` defines how the agent behaves and what principles it protects.
-- `dev-agent/AGENTS.md` defines operating procedures.
-- `dev-agent/ARCHITECTURE.md` and `dev-agent/TOOLS.md` hold project-specific context and service notes.
-- `dev-agent/MEMORY.md` and `dev-agent/memory/` show the long-term and day-by-day memory pattern.
-- `dev-agent/skills/` contains reusable skills you can copy into your own workspace.
+- `dev-agent/` — a development agent modeled after MindRoom's own `DevAgent`, built around the [`baspowers`](https://github.com/basnijholt/baspowers) skill library and MindRoom's native subagents (`run_subagent` / `continue_subagent`).
+  - `dev-agent/config.yaml` — sample MindRoom `agents:` snippet (single preloaded context file, self-delegation, deferred tools, file memory, skill learning, prompt curation).
+  - `dev-agent/AGENTS.md` — the **only** preloaded context file (`context_files: [AGENTS.md]`), holding concise operating rules, delegation/review policy, and hard rules.
+  - `dev-agent/MEMORY.md` — curated, low-churn long-term memory (`<200` lines, preloaded by `memory_backend: file`).
+  - `dev-agent/memory/` — per-thread status logs (`threads-YYYY-MM.md`) and topical notes searched semantically on demand.
+  - `dev-agent/ARCHITECTURE.md` and `dev-agent/TOOLS.md` — on-demand project and service references (not preloaded every turn).
+  - `dev-agent/skills/` — workspace skills directory (install `baspowers` here, plus project-specific skills like the included `developing-example-app` template).
+
+## The Lean Workspace Pattern
+
+Earlier agent workspaces often preloaded half a dozen persona files (`IDENTITY.md`, `SOUL.md`, `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, `MEMORY.md`) on every turn. That wastes context, multiplies prompt-cache invalidations across parallel threads, and invites conflicting rules.
+
+Instead, this layout separates **always-loaded** from **on-demand**:
+
+| Layer | Loaded when | Purpose |
+|---|---|---|
+| `AGENTS.md` | Every turn (`context_files`) | Operating rules, delegation/review policy, reply style, hard rules |
+| `MEMORY.md` | Every turn (`memory_backend: file`) | Short (`<200` lines), durable lessons that change rarely |
+| `skills/<name>/SKILL.md` | On demand (`get_skill_instructions`) | Composable workflows (`baspowers`) and project-specific runbooks |
+| `ARCHITECTURE.md`, `TOOLS.md` | On demand (`read_file`) | Repo map, services, commands, and environment caveats |
+| `memory/*.md` | On demand (`search_knowledge_base` / `memory`) | Thread status logs (`threads-YYYY-MM.md`) and deeper topical notes |
 
 ## How To Use
 
-1. Clone this repository into `~/.mindroom/agents/<your-agent>/workspace/`.
-2. Rename or duplicate `dev-agent/` for your own agent.
-3. Rewrite `IDENTITY.md`, `SOUL.md`, `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `MEMORY.md` for your project.
-4. Keep the skills you want, delete the rest, and update the placeholder paths and commands.
-5. Point your MindRoom agent config at the workspace.
+1. Copy `dev-agent/` into your MindRoom agent workspace (for example `~/.mindroom/mindroom_data/agents/dev/workspace/`).
+2. Install the [`baspowers`](https://github.com/basnijholt/baspowers) skills into `<workspace>/skills/` as **real directories** (MindRoom's skill loader refuses symlinks under `skills/`):
 
-## The Persona Pattern
+   ```bash
+   git clone --depth 1 https://github.com/basnijholt/baspowers /tmp/baspowers
+   cp -R /tmp/baspowers/skills/* <workspace>/skills/
+   ```
 
-The split is deliberate:
+   > Prefer manual approval gates at each workflow stage? You can use [obra/superpowers](https://github.com/obra/superpowers) instead and update the bootstrap line in `AGENTS.md`.
 
-- `IDENTITY.md`: who the agent is and what job it owns
-- `SOUL.md`: values, boundaries, decision rules, and communication style
-- `AGENTS.md`: operational procedures and command patterns
-- `ARCHITECTURE.md`: project map and deployment model
-- `TOOLS.md`: service endpoints, utilities, and caveats
-- `MEMORY.md`: durable facts worth carrying forward
-- `memory/YYYY-MM-DD.md`: short-lived daily notes
-
-That separation makes updates safer. You can change the project stack without rewriting the persona, or tighten behavioral rules without touching daily memory.
+3. Merge `dev-agent/config.yaml` into your MindRoom `config.yaml` and replace the placeholder model names, room keys, and Matrix user IDs.
+4. Replace the `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md` with your real repos and commands.
 
 ## Contributing
 
 Additional public-safe example agents are welcome by pull request. The bar is:
 
 - useful outside one private setup
-- stripped of secrets and personal infrastructure
-- concrete enough to copy into a real workspace
+- stripped of secrets, private hostnames, and personal infrastructure
+- concrete enough to copy into a real MindRoom workspace
