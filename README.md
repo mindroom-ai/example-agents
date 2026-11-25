@@ -26,7 +26,7 @@ Public, sanitized example agent workspaces for [MindRoom](https://github.com/min
 
 ```text
 dev-agent/
-├── config.yaml                  # MindRoom agents.dev snippet (merge into config.yaml)
+├── config.yaml                  # MindRoom plugins + agents.dev snippet (merge into config.yaml)
 ├── AGENTS.md                    # ⚡ Standard turns — rules, delegation, review policy
 ├── MEMORY.md                    # ⚡ Standard turns (<200 lines) — durable lessons only
 ├── ARCHITECTURE.md              # 📖 On demand — repo map, services, test commands
@@ -58,14 +58,16 @@ dev-agent/
      && cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
    ```
 
-2. **Install `baspowers` skills** as real directories (MindRoom does not follow symlinks inside `skills/`):
+2. **Install `baspowers` skills and required MindRoom plugins** (`baspowers` must be copied as real directories — MindRoom does not follow symlinks inside `skills/`):
 
    ```bash
    TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" \
      && cp -R "$TMP/skills/"* "$WORKSPACE/skills/" && rm -rf "$TMP"
+   mindroom plugins install pull-request-plugin
+   mindroom plugins install thread-worktree-plugin
    ```
 
-3. **Enable the agent:** merge [`dev-agent/config.yaml`](dev-agent/config.yaml) into your MindRoom `config.yaml` (updating `access.users` with your Matrix user ID, plus `model` and `rooms`), then replace `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
+3. **Enable the agent:** merge `plugins:` and `agents:` from [`dev-agent/config.yaml`](dev-agent/config.yaml) into your MindRoom `config.yaml` (updating `access.users` with your Matrix user ID, plus `model` and `rooms`), then replace `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
 
 > [!TIP]
 > Prefer manual approval gates at each workflow stage? Install [obra/superpowers](https://github.com/obra/superpowers) instead, update the opening line of `AGENTS.md`, and remove or replace the `baspowers`-only skill references (`consulting-cross-model`, `stopping-runaway-prs`, `scoring-pull-requests`).
