@@ -26,7 +26,7 @@ flowchart LR
 
 | File | Loaded | Purpose |
 |---|---|---|
-| [`config.yaml`](config.yaml) | Config snippet | MindRoom `agents.dev` setup: self-delegation, deferred tools, file memory, `skill_learning`, `room_activity` |
+| [`config.yaml`](config.yaml) | Config snippet | MindRoom `plugins:` (`pull-request-plugin`, `thread-worktree-plugin`) + `agents.dev` setup: self-delegation, deferred tools, file memory, `skill_learning`, `room_activity` |
 | [`AGENTS.md`](AGENTS.md) | Every standard turn | Core operating rules, cross-model delegation & review protocol, reply style, hard rules |
 | [`MEMORY.md`](MEMORY.md) | Every standard turn | Curated `<200`-line operational lessons (shell/git safety, subagent hygiene, review heuristics) |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | On demand | Project repos, service ports, verification model |
@@ -44,14 +44,16 @@ flowchart LR
      && cp -R dev-agent/. "$WORKSPACE/" && rm "$WORKSPACE/config.yaml"
    ```
 
-2. **Install `baspowers` skills** as real directories (MindRoom does not follow symlinks inside `skills/`):
+2. **Install `baspowers` skills and required MindRoom plugins** (`baspowers` must be copied as real directories — MindRoom does not follow symlinks inside `skills/`):
 
    ```bash
    TMP=$(mktemp -d) && git clone --depth 1 https://github.com/basnijholt/baspowers "$TMP" \
      && cp -R "$TMP/skills/"* "$WORKSPACE/skills/" && rm -rf "$TMP"
+   mindroom plugins install pull-request-plugin
+   mindroom plugins install thread-worktree-plugin
    ```
 
-3. **Wire it up:** merge [`config.yaml`](config.yaml) into your MindRoom `config.yaml` (updating `access.users` with your Matrix user ID, plus `model` and `rooms`), then customize `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
+3. **Wire it up:** merge `plugins:` and `agents:` from [`config.yaml`](config.yaml) into your MindRoom `config.yaml` (updating `access.users` with your Matrix user ID, plus `model` and `rooms`), then customize `<placeholders>` in `AGENTS.md`, `ARCHITECTURE.md`, `TOOLS.md`, and `skills/developing-example-app/SKILL.md`.
 
 <details>
 <summary><b>Key behaviors built into AGENTS.md</b></summary>

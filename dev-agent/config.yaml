@@ -1,6 +1,13 @@
-# Sample MindRoom agent configuration for DevAgent.
-# Merge under top-level `agents:` in your MindRoom `config.yaml` and replace
-# `<placeholders>` with your own models, rooms, and Matrix user IDs.
+# Sample MindRoom configuration for DevAgent.
+# Install the plugins below first:
+#   mindroom plugins install pull-request-plugin
+#   mindroom plugins install thread-worktree-plugin
+# Then merge `plugins:` and `agents:` into your MindRoom `config.yaml` and
+# replace `<placeholders>` with your own models, rooms, and Matrix user IDs.
+
+plugins:
+  - path: plugins/pull-request-plugin      # https://github.com/mindroom-ai/pull-request-plugin
+  - path: plugins/thread-worktree-plugin   # https://github.com/mindroom-ai/thread-worktree-plugin
 
 agents:
   dev:
@@ -94,8 +101,7 @@ agents:
           defer: true
       - temporary_secrets:
           defer: true
-      # Optional MindRoom plugins (install plugin first, then uncomment):
-      # - pull_requests:    # https://github.com/mindroom-ai/pull-request-plugin
-      #     defer: true
-      # - thread_worktree:  # https://github.com/mindroom-ai/thread-worktree-plugin
-      #     defer: true
+      - pull_requests:    # from plugins/pull-request-plugin
+          defer: true
+      - thread_worktree:  # from plugins/thread-worktree-plugin
+          defer: true

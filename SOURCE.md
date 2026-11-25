@@ -14,6 +14,6 @@ This repo is a **sanitized public snapshot** modeled after MindRoom's live `DevA
 When porting improvements from a live MindRoom dev workspace into `dev-agent/`:
 
 1. Keep `AGENTS.md` and `MEMORY.md` lean, generic, and free of private hostnames, repo names, secrets, environment variable names for private keys, or user-specific details.
-2. Keep `dev-agent/config.yaml` valid against MindRoom's current `agents:` configuration schema, leaving optional plugins commented with links.
+2. Keep `dev-agent/config.yaml` valid against MindRoom's current `plugins:` and `agents:` configuration schema, with required plugin installs documented in the Quick Start.
 3. Do not vendor third-party skill repositories into `dev-agent/skills/`; document how to install them instead.
 4. Update the snapshot date above.
